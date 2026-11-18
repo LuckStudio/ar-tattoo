@@ -54,3 +54,6 @@ pre { background: #000; padding: 12px; border-radius: 8px; overflow-x: auto; fon
 }
 .ar-error { padding: 24px; }
 #stage { position: fixed; inset: 0; overflow: hidden; }
+.card img { object-fit: contain; background: #f3e6dc; }
+.actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.actions .btn { padding: 8px 12px; font-size: .9rem; }

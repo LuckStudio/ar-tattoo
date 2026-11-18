@@ -7,17 +7,35 @@ Tecnología: [MindAR](https://github.com/hiukim/mind-ar-js) (tracking de imagen)
 ## Estructura
 
 ```
-index.html            Galería: lista los tattoos de config/tattoos.json
-ar.html               Visor AR (ar.html?t=<id>): cámara + tracking + modelo 3D
+index.html            Galería: lista los tattoos de config/tattoos.json (botones "Abrir AR" y "Vista 3D")
+ar.html               Visor AR (ar.html?t=<id>): cámara + tracking + 3D
+                      Vista previa sin cámara: ar.html?t=<id>&preview
 compiler.html         Sube la foto del tattoo → genera el marcador .mind en el navegador
 config/tattoos.json   Un registro por tattoo: marcador, modelo, escala, posición…
 js/config.js          Lectura de la configuración
+js/effects/           Efectos 3D programados, p. ej. mandala.js
+tools/extract_tattoo.py  Aísla el diseño de una foto del tattoo (marcador + PNG + contornos)
 css/style.css         Estilos
 assets/markers/       Fotos de los tattoos (miniatura de la galería)
 assets/targets/       Marcadores compilados (.mind)
 assets/models/        Modelos 3D (.glb)
+assets/effects/       Datos de los efectos (contornos vectoriales del diseño)
 .nojekyll             Evita que GitHub Pages procese el sitio con Jekyll
 ```
+
+## Tattoo "Mandala de loto"
+
+- `assets/markers/mandala.jpg`: el marcador, con la tinta real aislada sobre un fondo de piel uniforme.
+- `assets/markers/mandala-design.png`: el diseño aislado con fondo transparente.
+- `assets/effects/mandala.json`: contornos vectoriales del diseño en coordenadas AR.
+- `js/effects/mandala.js`: la secuencia 3D:
+  1. El diseño del tattoo se eleva de la piel como un relieve de cobre, en el mismo sitio que la tinta.
+  2. En el centro se abre una flor de loto 3D con 4 pétalos lobulados y pétalos interiores en diagonal, como en el tattoo.
+  3. La gota de arriba se enciende como una llama.
+  4. Los puntos del tattoo sueltan chispas que suben.
+  Tocar la pantalla repite la animación.
+
+Para regenerarlo desde otra foto: `python3 tools/extract_tattoo.py recorte.jpg mandala` y vuelve a compilar el `.mind` en `compiler.html`.
 
 ## Añadir un tattoo nuevo
 

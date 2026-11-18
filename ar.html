@@ -18,6 +18,24 @@
   <div class="ar-hint" id="hint">Apunta la cámara al tattoo…</div>
   <div id="stage"></div>
 
+  <script>
+    // Girar la vista previa arrastrando con el dedo o el ratón
+    AFRAME.registerComponent('drag-rotate', {
+      init() {
+        let down = false, px = 0, py = 0;
+        const el = this.el;
+        window.addEventListener('pointerdown', (e) => { down = true; px = e.clientX; py = e.clientY; });
+        window.addEventListener('pointerup', () => { down = false; });
+        window.addEventListener('pointermove', (e) => {
+          if (!down) return;
+          const r = el.object3D.rotation;
+          r.y += (e.clientX - px) * 0.01;
+          r.x = Math.max(-1.5, Math.min(0.3, r.x + (e.clientY - py) * 0.01));
+          px = e.clientX; py = e.clientY;
+        });
+      },
+    });
+  </script>
   <script type="module">
     import { getTattoo } from './js/config.js';
 
@@ -25,20 +43,56 @@
     const stage = document.getElementById('stage');
     const hint = document.getElementById('hint');
 
-    try {
+    async function main() {
       const t = await getTattoo(params.get('t'));
       if (!t) throw new Error('No hay tattoos en config/tattoos.json');
       document.getElementById('title').textContent = t.name;
 
-      // Si no hay modelo GLB todavía, se muestra una figura de prueba
-      const content = t.model
-        ? `<a-gltf-model src="#model" ${t.animate ? 'animation-mixer' : ''}
-             scale="${t.scale} ${t.scale} ${t.scale}"
-             position="${t.position}" rotation="${t.rotation}"></a-gltf-model>`
-        : `<a-torus-knot color="#ff4f7b" radius="0.25" radius-tubular="0.04"
-             scale="${t.scale} ${t.scale} ${t.scale}" position="${t.position}"
+      const preview = params.has('preview');
+      const s = t.scale ?? 1;
+
+      // Contenido 3D: efecto programado (js/effects/<nombre>.js), modelo GLB o figura de prueba
+      let content;
+      if (t.effect) {
+        await import(`./js/effects/${t.effect}.js`);
+        content = `<a-entity effect-${t.effect}="src: ${t.effectData}; autostart: ${preview}"></a-entity>`;
+      } else if (t.model) {
+        content = `<a-gltf-model src="#model" ${t.animate ? 'animation-mixer' : ''}
+             scale="${s} ${s} ${s}" position="${t.position}" rotation="${t.rotation}"></a-gltf-model>`;
+      } else {
+        content = `<a-torus-knot color="#ff4f7b" radius="0.25" radius-tubular="0.04"
+             scale="${s} ${s} ${s}" position="${t.position}"
              ${t.animate ? 'animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"' : ''}>
            </a-torus-knot>`;
+      }
+
+      const assets = t.model ? `<a-asset-item id="model" src="${t.model}"></a-asset-item>` : '';
+      const lights = `
+          <a-light type="ambient" intensity="1"></a-light>
+          <a-light type="directional" position="0.3 1 1" intensity="1.5"></a-light>`;
+
+      if (preview) {
+        // Vista previa sin cámara: el marcador como plano + el efecto, arrastra para girar
+        hint.textContent = 'Vista previa · arrastra para girar · toca para repetir';
+        const img = new Image();
+        img.src = t.marker;
+        await img.decode();
+        const aspect = img.naturalHeight / img.naturalWidth;
+        stage.innerHTML = `
+          <a-scene renderer="colorManagement: true; physicallyCorrectLights: true; antialias: true"
+            vr-mode-ui="enabled: false" background="color: #18181c">
+            <a-assets><img id="marker" src="${t.marker}" />${assets}</a-assets>
+            <a-camera position="0 0 ${Math.max(1.8, aspect * 0.95)}" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+            ${lights}
+            <a-entity drag-rotate rotation="-45 0 0">
+              <a-entity id="target">
+                <a-plane src="#marker" width="1" height="${aspect}" material="shader: flat"></a-plane>
+                ${content}
+              </a-entity>
+            </a-entity>
+          </a-scene>`;
+        return;
+      }
 
       // La escena se crea después de leer la config para poder fijar el .mind del tattoo
       stage.innerHTML = `
@@ -46,12 +100,9 @@
           mindar-image="imageTargetSrc: ${t.target}; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no"
           color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true"
           vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-          <a-assets>
-            ${t.model ? `<a-asset-item id="model" src="${t.model}"></a-asset-item>` : ''}
-          </a-assets>
+          <a-assets>${assets}</a-assets>
           <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-          <a-light type="ambient" intensity="1"></a-light>
-          <a-light type="directional" position="0 1 1" intensity="1.5"></a-light>
+          ${lights}
           <a-entity id="target" mindar-image-target="targetIndex: 0">
             ${content}
           </a-entity>
@@ -63,9 +114,11 @@
       stage.querySelector('a-scene').addEventListener('arError', () => {
         hint.textContent = 'No se pudo acceder a la cámara (¿permisos / HTTPS?)';
       });
-    } catch (e) {
-      stage.innerHTML = `<p class="ar-error">${e.message}</p>`;
     }
+
+    main().catch((e) => {
+      stage.innerHTML = `<p class="ar-error">${e.message}</p>`;
+    });
   </script>
 </body>
 </html>

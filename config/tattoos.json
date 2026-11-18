@@ -1,6 +1,16 @@
 {
   "tattoos": [
     {
+      "id": "mandala",
+      "name": "Mandala de loto",
+      "description": "El diseño se eleva de la piel, la flor se abre y la gota se enciende como una llama.",
+      "target": "assets/targets/mandala.mind",
+      "marker": "assets/markers/mandala.jpg",
+      "thumbnail": "assets/markers/mandala-design.png",
+      "effect": "mandala",
+      "effectData": "assets/effects/mandala.json"
+    },
+    {
       "id": "demo",
       "name": "Tattoo demo",
       "description": "Marcador de prueba: abre assets/markers/demo.png en otra pantalla y apunta la cámara.",

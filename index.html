@@ -23,13 +23,17 @@
     try {
       const tattoos = await loadTattoos();
       grid.innerHTML = tattoos.map((t) => `
-        <a class="card" href="ar.html?t=${encodeURIComponent(t.id)}">
-          <img src="${t.marker}" alt="${t.name}" loading="lazy" />
+        <div class="card">
+          <img src="${t.thumbnail || t.marker}" alt="${t.name}" loading="lazy" />
           <div class="body">
             <h2>${t.name}</h2>
             <p>${t.description || ''}</p>
+            <div class="actions">
+              <a class="btn" href="ar.html?t=${encodeURIComponent(t.id)}">Abrir AR</a>
+              <a class="btn ghost" href="ar.html?t=${encodeURIComponent(t.id)}&preview">Vista 3D</a>
+            </div>
           </div>
-        </a>`).join('');
+        </div>`).join('');
     } catch (e) {
       grid.textContent = e.message;
     }
