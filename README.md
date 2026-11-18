@@ -28,11 +28,14 @@ assets/effects/       Datos de los efectos (contornos vectoriales del diseño)
 - `assets/markers/mandala.jpg`: el marcador, con la tinta real aislada sobre un fondo de piel uniforme.
 - `assets/markers/mandala-design.png`: el diseño aislado con fondo transparente.
 - `assets/effects/mandala.json`: contornos vectoriales del diseño en coordenadas AR.
-- `js/effects/mandala.js`: la secuencia 3D:
-  1. El diseño del tattoo se eleva de la piel como un relieve de cobre, en el mismo sitio que la tinta.
-  2. En el centro se abre una flor de loto 3D con 4 pétalos lobulados y pétalos interiores en diagonal, como en el tattoo.
-  3. La gota de arriba se enciende como una llama.
-  4. Los puntos del tattoo sueltan chispas que suben.
+- `js/effects/mandala.js`: la secuencia 3D (solo elementos 3D, sin calcar el trazo):
+  1. Una onda de luz se expande desde el centro de la mandala.
+  2. Un capullo brota de la piel girando y florece por capas: pétalos lobulados en cruz y en diagonal (como en el tattoo), con degradado y estambres dorados.
+  3. Las hojas del tattoo se despegan de su sitio exacto, dan una vuelta y vuelan a orbitar alrededor de la flor.
+  4. La gota se enciende: llama animada con shader y brasas que suben.
+  5. Anillos de halo con cuentas giran bajo la flor.
+  6. Los puntos del tattoo se convierten en luciérnagas.
+  7. Algunos pétalos se desprenden y flotan, y cada 6 s vuelve una onda de luz suave.
   Tocar la pantalla repite la animación.
 
 Para regenerarlo desde otra foto: `python3 tools/extract_tattoo.py recorte.jpg mandala` y vuelve a compilar el `.mind` en `compiler.html`.
