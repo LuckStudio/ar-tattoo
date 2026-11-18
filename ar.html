@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Tattoo · Visor</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- A-Frame + MindAR (tracking de imagen) + aframe-extras (animaciones de modelos GLB) -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.2.0/dist/aframe-extras.min.js"></script>
+</head>
+<body>
+  <div class="ar-ui">
+    <a href="index.html">← Volver</a>
+    <span id="title"></span>
+  </div>
+  <div class="ar-hint" id="hint">Apunta la cámara al tattoo…</div>
+  <div id="stage"></div>
+
+  <script type="module">
+    import { getTattoo } from './js/config.js';
+
+    const params = new URLSearchParams(location.search);
+    const stage = document.getElementById('stage');
+    const hint = document.getElementById('hint');
+
+    try {
+      const t = await getTattoo(params.get('t'));
+      if (!t) throw new Error('No hay tattoos en config/tattoos.json');
+      document.getElementById('title').textContent = t.name;
+
+      // Si no hay modelo GLB todavía, se muestra una figura de prueba
+      const content = t.model
+        ? `<a-gltf-model src="#model" ${t.animate ? 'animation-mixer' : ''}
+             scale="${t.scale} ${t.scale} ${t.scale}"
+             position="${t.position}" rotation="${t.rotation}"></a-gltf-model>`
+        : `<a-torus-knot color="#ff4f7b" radius="0.25" radius-tubular="0.04"
+             scale="${t.scale} ${t.scale} ${t.scale}" position="${t.position}"
+             ${t.animate ? 'animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"' : ''}>
+           </a-torus-knot>`;
+
+      // La escena se crea después de leer la config para poder fijar el .mind del tattoo
+      stage.innerHTML = `
+        <a-scene
+          mindar-image="imageTargetSrc: ${t.target}; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001; uiScanning: no"
+          color-space="sRGB" renderer="colorManagement: true; physicallyCorrectLights: true"
+          vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+          <a-assets>
+            ${t.model ? `<a-asset-item id="model" src="${t.model}"></a-asset-item>` : ''}
+          </a-assets>
+          <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+          <a-light type="ambient" intensity="1"></a-light>
+          <a-light type="directional" position="0 1 1" intensity="1.5"></a-light>
+          <a-entity id="target" mindar-image-target="targetIndex: 0">
+            ${content}
+          </a-entity>
+        </a-scene>`;
+
+      const target = document.getElementById('target');
+      target.addEventListener('targetFound', () => (hint.style.opacity = 0));
+      target.addEventListener('targetLost', () => (hint.style.opacity = 1));
+      stage.querySelector('a-scene').addEventListener('arError', () => {
+        hint.textContent = 'No se pudo acceder a la cámara (¿permisos / HTTPS?)';
+      });
+    } catch (e) {
+      stage.innerHTML = `<p class="ar-error">${e.message}</p>`;
+    }
+  </script>
+</body>
+</html>

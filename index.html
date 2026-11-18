@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Tattoo</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Galería</a>
+      <a href="compiler.html">Crear marcador</a>
+    </nav>
+    <h1>AR Tattoo</h1>
+    <p class="lead">Elige un tattoo, apunta la cámara al tattoo real y verás aparecer su modelo 3D.</p>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script type="module">
+    import { loadTattoos } from './js/config.js';
+    const grid = document.getElementById('grid');
+    try {
+      const tattoos = await loadTattoos();
+      grid.innerHTML = tattoos.map((t) => `
+        <a class="card" href="ar.html?t=${encodeURIComponent(t.id)}">
+          <img src="${t.marker}" alt="${t.name}" loading="lazy" />
+          <div class="body">
+            <h2>${t.name}</h2>
+            <p>${t.description || ''}</p>
+          </div>
+        </a>`).join('');
+    } catch (e) {
+      grid.textContent = e.message;
+    }
+  </script>
+</body>
+</html>

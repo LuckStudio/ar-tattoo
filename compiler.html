@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AR Tattoo · Crear marcador</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Galería</a>
+      <a href="compiler.html">Crear marcador</a>
+    </nav>
+    <h1>Crear marcador desde tu tattoo</h1>
+    <p class="lead">Sube la foto del tattoo y genera el archivo <code>.mind</code> que usa el visor AR. Todo se procesa en tu navegador.</p>
+
+    <div class="panel">
+      <ul class="tips">
+        <li>Foto de frente, sin reflejos y con buena luz.</li>
+        <li>Recorta al tattoo dejando un poco de piel alrededor.</li>
+        <li>Los tattoos con mucho detalle y contraste se detectan mejor que los de línea fina.</li>
+      </ul>
+      <input type="file" id="file" accept="image/*" />
+      <div class="previews" id="previews"></div>
+    </div>
+
+    <div class="panel">
+      <button class="btn" id="compile" disabled>Generar marcador</button>
+      <p id="status"></p>
+      <progress id="progress" value="0" max="100" hidden></progress>
+    </div>
+
+    <div class="panel" id="result" hidden>
+      <a class="btn" id="download" download="tattoo.mind">Descargar .mind</a>
+      <p>Guarda el archivo en <code>assets/targets/</code>, la foto en <code>assets/markers/</code>, tu modelo en <code>assets/models/</code> y añade esto a <code>config/tattoos.json</code>:</p>
+      <pre id="snippet"></pre>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Compiler } from 'https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image.prod.js';
+
+    const fileInput = document.getElementById('file');
+    const previews = document.getElementById('previews');
+    const btn = document.getElementById('compile');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    let image = null;
+    let baseName = 'tattoo';
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      baseName = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'tattoo';
+      const url = URL.createObjectURL(file);
+      // Imagen para compilar: fuera del DOM, para que conserve su resolución real
+      image = new Image();
+      image.onload = () => { btn.disabled = false; };
+      image.src = url;
+      const preview = new Image();
+      preview.src = url;
+      previews.innerHTML = '';
+      previews.appendChild(preview);
+    });
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      progress.hidden = false;
+      status.textContent = 'Analizando puntos de referencia del tattoo…';
+      try {
+        const compiler = new Compiler();
+        await compiler.compileImageTargets([image], (p) => { progress.value = p; });
+        const data = await compiler.exportData();
+        const blob = new Blob([data]);
+        const link = document.getElementById('download');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${baseName}.mind`;
+        document.getElementById('snippet').textContent = JSON.stringify({
+          id: baseName,
+          name: baseName,
+          description: '',
+          target: `assets/targets/${baseName}.mind`,
+          marker: `assets/markers/${baseName}.jpg`,
+          model: `assets/models/${baseName}.glb`,
+          scale: 0.5,
+          position: '0 0 0.1',
+          rotation: '0 0 0',
+          animate: true
+        }, null, 2);
+        document.getElementById('result').hidden = false;
+        status.textContent = 'Listo ✔';
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

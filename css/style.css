@@ -1,0 +1,56 @@
+:root {
+  --bg: #0e0e10;
+  --card: #1a1a1f;
+  --text: #f2f2f2;
+  --muted: #9a9aa5;
+  --accent: #ff4f7b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.8rem; margin: 0 0 4px; }
+p.lead { color: var(--muted); margin: 0 0 24px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.card {
+  background: var(--card); border-radius: 14px; overflow: hidden;
+  display: flex; flex-direction: column; text-decoration: none; color: inherit;
+}
+.card img { width: 100%; aspect-ratio: 1; object-fit: cover; background: #222; }
+.card .body { padding: 12px 14px 16px; }
+.card h2 { font-size: 1.05rem; margin: 0 0 4px; }
+.card p { font-size: .85rem; color: var(--muted); margin: 0; }
+.btn {
+  display: inline-block; background: var(--accent); color: #fff; border: 0;
+  padding: 12px 18px; border-radius: 10px; font-size: 1rem; cursor: pointer;
+  text-decoration: none;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.ghost { background: transparent; border: 1px solid #444; }
+nav { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+nav a { color: var(--muted); }
+.panel { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+.previews { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.previews img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
+progress { width: 100%; height: 12px; }
+pre { background: #000; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: .8rem; }
+.tips li { margin-bottom: 6px; color: var(--muted); }
+
+/* Visor AR */
+.ar-ui {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; background: linear-gradient(#000a, #0000);
+}
+.ar-ui a { color: #fff; text-decoration: none; font-size: .95rem; }
+.ar-hint {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 10;
+  background: #000a; padding: 10px 16px; border-radius: 999px; font-size: .9rem;
+  transition: opacity .3s;
+}
+.ar-error { padding: 24px; }
+#stage { position: fixed; inset: 0; overflow: hidden; }

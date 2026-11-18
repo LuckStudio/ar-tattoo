@@ -1,0 +1,16 @@
+{
+  "tattoos": [
+    {
+      "id": "demo",
+      "name": "Tattoo demo",
+      "description": "Marcador de prueba: abre assets/markers/demo.png en otra pantalla y apunta la cámara.",
+      "target": "assets/targets/demo.mind",
+      "marker": "assets/markers/demo.png",
+      "model": "",
+      "scale": 0.5,
+      "position": "0 0 0.1",
+      "rotation": "0 0 0",
+      "animate": true
+    }
+  ]
+}
